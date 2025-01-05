@@ -98,4 +98,43 @@ async function fetchCategories() {
 }
 
 // Function to fetch and display papers for a category
-async function fetchPapers(categor
+async function fetchPapers(category) {
+  paperList.innerHTML = '';
+  const response = await fetch(`https://api.github.com/repos/hiroyokoi/researchpapers/contents/Research_papers/${category}`);
+  const data = await response.json();
+  const papers = data.filter(item => item.type === 'dir');
+  
+  papers.forEach(paper => {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = '#';
+    a.textContent = paper.name;
+    a.onclick = () => fetchPaperContent(category, paper.name);
+    li.appendChild(a);
+    paperList.appendChild(li);
+  });
+}
+
+// Function to fetch and display paper content
+async function fetchPaperContent(category, paper) {
+  const response = await fetch(`https://api.github.com/repos/hiroyokoi/researchpapers/contents/Research_papers/${category}/${paper}/${paper}.md`);
+  const data = await response.json();
+  const content = atob(data.content);
+  paperContent.innerHTML = marked.parse(content);
+}
+
+// Event listener for category selection
+categorySelect.addEventListener('change', (e) => {
+  if (e.target.value) {
+    fetchPapers(e.target.value);
+  } else {
+    paperList.innerHTML = '';
+    paperContent.innerHTML = '';
+  }
+});
+
+// Initialize categories on page load
+fetchCategories();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
