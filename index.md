@@ -85,7 +85,7 @@ const paperContent = document.getElementById('paper-content');
 
 // Function to fetch and populate categories
 async function fetchCategories() {
-  const response = await fetch('https://api.github.com/repos/YOUR_USERNAME/YOUR_REPO/contents/Research_papers');
+  const response = await fetch('https://api.github.com/repos/hiroyokoi/researchpapers/contents/Research_papers');
   const data = await response.json();
   const categories = data.filter(item => item.type === 'dir').map(item => item.name);
   
