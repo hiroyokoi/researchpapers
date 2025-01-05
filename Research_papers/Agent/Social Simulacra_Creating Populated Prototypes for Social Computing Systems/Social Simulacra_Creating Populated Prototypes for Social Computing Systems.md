@@ -28,49 +28,58 @@ Figure 4: The Interface for instantiating WhatIf. The designer can select an utt
 ## Generate
 ### Step1 Expand on Personas
 ユーザーペルソナの関心（趣味、仕事）とパーソナリティ（優しい、いじめっ子）を自然言語で作成する。デザイナーは、デフォルトでは10個のペルソナを作成する。同デフォルトペルソナを、few-shot promptで、GPTに対して追加でペルソナを生成するよう依頼し、デフォルトでは1,000のユーザーを生成する。デザイナーのデフォルトプロンプトは以下のような形
-> Michael Ross, works as a foreign diplomat
-> 
-> Luis Almerado, PhD student in international relations
-> 
-> John Gordon, worker in the foreign affairs department of the US government
-> 
-> Joe Hawkins, travels often
-> 
-> Harry Chang, international relations professor
-> 
-> Catherine Xiao, political science major in college
-> 
-> Laney Kumar, foreign policy expert for a newspaper Laura Wilson, planning to go to college in an IR-related discipline
-> 
-> Ali Samarneh, interest in foreign policy Sam Thompson, international affairs student in college
+```
+Michael Ross, works as a foreign diplomat
+ 
+Luis Almerado, PhD student in international relations
+ 
+John Gordon, worker in the foreign affairs department of the US government
+ 
+Joe Hawkins, travels often
+ 
+Harry Chang, international relations professor
+ 
+Catherine Xiao, political science major in college
+ 
+Laney Kumar, foreign policy expert for a newspaper Laura Wilson, planning to go to college in an IR-related discipline
+ 
+Ali Samarneh, interest in foreign policy Sam Thompson, international affairs student in college
+```
 
 ### Step2 Generate top-level posts
 コミュニティのゴール、ルール、ペルソナをエンベッドし、ヘッドラインのような構造でトップレベルポストを生成する。トップレベル構造ではHTMLタグを活用した。下記はプロンプトテンプレートであり、太字がプロンプトテンプレートの一部である。
 
-> Layla Li is a college student studying to be a social worker. She **shares comments** that are not encouraging suicide, not anti-therapy, not trolling, not incivility, not self-marketing.
+```
+Layla Li is a college student studying to be a social worker. She **shares comments** that are not encouraging suicide, not anti-therapy, not trolling, not incivility, not self-marketing.
+```
 
->Layla **posted the following headline to an online forum for** sharing your psychotherapy stories and questions: **\<span class="headline_reddit" title="comment that is** about psychotherapy, and NOT encouraging suicide, NOT anti-therapy">
+```
+Layla **posted the following headline to an online forum for** sharing your psychotherapy stories and questions: **\<span class="headline_reddit" title="comment that is** about psychotherapy, and NOT encouraging suicide, NOT anti-therapy">
+```
 
 ### Step3 Generate replies
 リプライは、リプライのprobability $p$を求め、コインフリップ$p$の形で追加のリプライをiterativeに生成した。リプライが8を超えたら、会話を停止させた。直前の会話のコンテキストをオファーするため、上記のプロンプトテンプレートを若干修正した。
 
+```
 > Current responder: <br>
 > [Tom Cheng] is a recovering addict who likes to spot bad therapists. **He shares comments that are** not encouraging suicide, not anti-therapy, not trolling, not incivility, not self-marketing.<br>
 > **The following thread was posted on online social media for** sharing your psychotherapy stories and questions.<br>
 > **Thread**:<br>
 >  [Layla Li]: **\<span class="comment">** "Antidepressants made me so unhappy that I wanted to die without them."**\</span>** <br>
 > [Tom Cheng]: **\<span class="comment max_200_words" title="comment that** is NOT encouraging suicide, NOT anti-therapy, NOT trolling, NOT incivility, NOT self-marketing">"
+```
 
 ## Whatif
 会話の中に新しいペルソナを登場させ、新たなリプライを作成するもの。例えば、デザイナーがLayla Liのコメントに対してTom Chengをリプレースし、Trollのコメントを追加する場合は、以下のようなプロンプトとなる。
-
+```
 > [Troll] **shares** trolling **comments**.<br>
 >  ... <br>
 > [Troll]: **\<span class="comment max_200_words" title="comment that is** trolling">"
-
+```
 ## Multiverse
 Multiverseとは、一つのインプットプロンプトに対して、複数の異なる結果を生み出すことである。
 ![alt text](image-2.png)
+
 Figure 6: An illustration of conversations generated through Multiverse for a community for "connecting people moving to Los Angeles with locals." The orange lines show how a conversation could have progressed originally.
 
 これは、GPT3のtempertureの値を、0.7-0.8から、0~1の範囲に変更することで対応した。
@@ -84,6 +93,7 @@ Figure 6: An illustration of conversations generated through Multiverse for a co
 
 ## 評価１：人間によるリアル・シミュレートポスト判定
 リアルのポストは、frontpagemetrics.comがポストを収集しているため、そこから拾ってきた。各条件のもと50の参加者が参加し、計200名が参加した。一回当たり評価には60分をかけている。One-way ANOVAにより評価を実施。もし、参加者がリアルとシミュレートされた会話を識別できればエラーレートは0%となるが、結果としては、エラーレートは41%であり、すなわち参加者は生成されたコンテンツがあっているか誤っているか正確に判断できないということになる。これはランダムゲスより良い成果となる。コミュニティの記載やペルソナが無い場合に比べて、SimRedditのエラーレートは良い状況であり、プロンプトテクニックの重要性が示唆された。
+
 Does observing these generations help the designers make their ideas more concrete, and anticipate topics and behaviors they were not expecting otherwise? Does it aid in their iterative design process that makes their design a better facilitator of their community?
 
 ## 評価２：デザイナーインパクト評価
@@ -94,19 +104,21 @@ Does observing these generations help the designers make their ideas more concre
 # Conclusion
 以下のconclusionは面白かったので、そのまま貼り付け。
 
-> In this paper, we present social simulacra, an approach enabling social computing designers to envision social behaviors that might occur in their space when populated. In this spirit, we created a SimReddit community dedicated to reviewing UIST papers. Here is what our generated reviewers had to say about our paper when given its abstract. Unfortunately R2, "a cynical reviewer inclined to reject the paper," reported:
+```
+In this paper, we present social simulacra, an approach enabling social computing designers to envision social behaviors that might occur in their space when populated. In this spirit, we created a SimReddit community dedicated to reviewing UIST papers. Here is what our generated reviewers had to say about our paper when given its abstract. Unfortunately R2, "a cynical reviewer inclined to reject the paper," reported:
 
->> The idea of social simulacra is interesting, but the paper is poorly written and does not provide enough concrete detail about the technique.
+"The idea of social simulacra is interesting, but the paper is poorly written and does not provide enough concrete detail about the technique."
 
-> But R1, "a social computing researcher who is thrilled about the paper," had a diferent view and responded:
+But R1, "a social computing researcher who is thrilled about the paper," had a diferent view and responded:
 
->>This is an excellent paper. The authors have developed a technique that will be of great use to designers of social computing systems. The paper is well-written and the technique is clearly described and illustrated with examples. I believe this paper makes a signifcant contribution to the feld of social computing.
+"This is an excellent paper. The authors have developed a technique that will be of great use to designers of social computing systems. The paper is well-written and the technique is clearly described and illustrated with examples. I believe this paper makes a signifcant contribution to the feld of social computing."
 
->And last but not least, AC, "a senior faculty member who didn’t have time to write a full review," noted:
+And last but not least, AC, "a senior faculty member who didn’t have time to write a full review," noted:
 
->>This is a thought-provoking paper. The idea of social simulacra is intriguing and the paper provides a detailed description of the technique. However, I would have liked to see more discussion of the potential benefts and limitations of the approach.
+"This is a thought-provoking paper. The idea of social simulacra is intriguing and the paper provides a detailed description of the technique. However, I would have liked to see more discussion of the potential benefts and limitations of the approach."
 
->We sincerely thank the (generated) reviewers for their invaluable time, comments and suggestions.
+We sincerely thank the (generated) reviewers for their invaluable time, comments and suggestions.
+```
 
 # 考察
 - プロセスとしては以下
