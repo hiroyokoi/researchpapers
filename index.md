@@ -78,6 +78,99 @@ h1 {
 
 <div id="paper-content"></div>
 
+
+<script>
+const categorySelect = document.getElementById('category-select');
+const paperList = document.getElementById('paper-list');
+const paperContent = document.getElementById('paper-content');
+
+let categories = [];
+let papers = {};
+
+// Function to fetch and populate categories
+async function fetchCategories() {
+  try {
+    const response = await fetch('/data/categories.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    categories = await response.json();
+    
+    categories.forEach(category => {
+      const option = document.createElement('option');
+      option.value = category;
+      option.textContent = category;
+      categorySelect.appendChild(option);
+    });
+  } catch (error) {
+    console.error("Failed to fetch categories:", error);
+    categorySelect.innerHTML = '<option value="">Error loading categories</option>';
+  }
+}
+
+// Function to fetch and display papers for a category
+async function fetchPapers(category) {
+  try {
+    if (!papers[category]) {
+      const response = await fetch(`/data/${category}.json`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      papers[category] = await response.json();
+    }
+    
+    paperList.innerHTML = '';
+    papers[category].forEach(paper => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.href = '#';
+      a.textContent = paper.title;
+      a.onclick = (e) => {
+        e.preventDefault();
+        fetchPaperContent(category, paper.title);
+      };
+      li.appendChild(a);
+      paperList.appendChild(li);
+    });
+  } catch (error) {
+    console.error(`Failed to fetch papers for ${category}:`, error);
+    paperList.innerHTML = '<li>Error loading papers</li>';
+  }
+}
+
+// Function to fetch and display paper content
+async function fetchPaperContent(category, title) {
+  try {
+    const response = await fetch(`/Research_papers/${category}/${title}/${title}.md`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const content = await response.text();
+    paperContent.innerHTML = marked.parse(content);
+  } catch (error) {
+    console.error(`Failed to fetch content for ${title}:`, error);
+    paperContent.innerHTML = 'Error loading paper content';
+  }
+}
+
+// Event listener for category selection
+categorySelect.addEventListener('change', (e) => {
+  if (e.target.value) {
+    fetchPapers(e.target.value);
+  } else {
+    paperList.innerHTML = '';
+    paperContent.innerHTML = '';
+  }
+});
+
+// Initialize categories on page load
+document.addEventListener('DOMContentLoaded', async () => {
+  await fetchCategories();
+});
+</script>
+
+
+<!-- 
 <script>
 const categorySelect = document.getElementById('category-select');
 const paperList = document.getElementById('paper-list');
@@ -140,6 +233,6 @@ categorySelect.addEventListener('change', (e) => {
 
 // Initialize categories on page load
 fetchCategories();
-</script>
+</script> -->
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
