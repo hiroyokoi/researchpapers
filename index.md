@@ -78,7 +78,6 @@ h1 {
 
 <div id="paper-content"></div>
 
-
 <script>
 const categorySelect = document.getElementById('category-select');
 const paperList = document.getElementById('paper-list');
@@ -168,71 +167,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   await fetchCategories();
 });
 </script>
-
-
-<!-- 
-<script>
-const categorySelect = document.getElementById('category-select');
-const paperList = document.getElementById('paper-list');
-const paperContent = document.getElementById('paper-content');
-
-let categories = [];
-let papers = {};
-
-// Function to fetch and populate categories
-async function fetchCategories() {
-  const response = await fetch('/data/categories.json');
-  categories = await response.json();
-  
-  categories.forEach(category => {
-    const option = document.createElement('option');
-    option.value = category;
-    option.textContent = category;
-    categorySelect.appendChild(option);
-  });
-}
-
-// Function to fetch and display papers for a category
-async function fetchPapers(category) {
-  if (!papers[category]) {
-    const response = await fetch(`/data/${category}.json`);
-    papers[category] = await response.json();
-  }
-  
-  paperList.innerHTML = '';
-  papers[category].forEach(paper => {
-    const li = document.createElement('li');
-    const a = document.createElement('a');
-    a.href = '#';
-    a.textContent = paper.title;
-    a.onclick = (e) => {
-      e.preventDefault();
-      fetchPaperContent(category, paper.title);
-    };
-    li.appendChild(a);
-    paperList.appendChild(li);
-  });
-}
-
-// Function to fetch and display paper content
-async function fetchPaperContent(category, title) {
-  const response = await fetch(`/Research_papers/${category}/${title}/${title}.md`);
-  const content = await response.text();
-  paperContent.innerHTML = marked.parse(content);
-}
-
-// Event listener for category selection
-categorySelect.addEventListener('change', (e) => {
-  if (e.target.value) {
-    fetchPapers(e.target.value);
-  } else {
-    paperList.innerHTML = '';
-    paperContent.innerHTML = '';
-  }
-});
-
-// Initialize categories on page load
-fetchCategories();
-</script> -->
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
