@@ -1,1 +1,1 @@
-# 個人関なResearch papersのサマリを作成しています。
+# 個人的なResearch papersのサマリを作成しています。
