@@ -164,7 +164,7 @@
                     .then(markdown => {
                         const htmlContent = marked.parse(markdown);
                         const modifiedHtmlContent = htmlContent.replace(/src="([^"]+)"/g, (match, p1) => {
-                            return `src="Research_papers/${category}/${encodedTitle}/${p1}"`;
+                            return `src="Research_papers/${category}/${encodedTitle}/${p1}" style="max-width:100%;height:auto;"`;
                         });
                         paperSummary.innerHTML = modifiedHtmlContent;
                     })
