@@ -167,35 +167,25 @@
             }
 
             function loadPaperImages(category, sanitizedTitle) {
-                const paperDirPath = `Research_papers/${category}/${sanitizedTitle}/`;
-                const imageExtensions = ['.png'];
-
-                fetch(paperDirPath)
+                const imagesPath = `Research_papers/${category}/${sanitizedTitle}/images.json`;
+                fetch(imagesPath)
                     .then(response => {
                         if (!response.ok) {
                             throw new Error(`HTTP error! status: ${response.status}`);
                         }
-                        return response.text();
+                        return response.json();
                     })
-                    .then(html => {
-                        const parser = new DOMParser();
-                        const doc = parser.parseFromString(html, 'text/html');
-                        const images = [];
-                        doc.querySelectorAll('a').forEach(link => {
-                            const href = link.getAttribute('href');
-                            if (imageExtensions.some(ext => href.endsWith(ext))) {
-                                images.push(href);
-                            }
-                        });
+                    .then(images => {
                         paperImages.innerHTML = '';
                         images.forEach(image => {
                             const img = document.createElement('img');
-                            img.src = `${paperDirPath}${image}`;
+                            img.src = `Research_papers/${category}/${sanitizedTitle}/${image}`;
                             paperImages.appendChild(img);
                         });
                     })
                     .catch(error => {
                         console.error(`Failed to fetch images for ${sanitizedTitle}:`, error);
+                        paperImages.innerHTML = '';  // Clear any previous images
                     });
             }
         });
