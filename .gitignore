@@ -1,0 +1,7 @@
+# .gitignore
+
+# Ignore all files in the 00_template directory
+00_template/
+
+# Ignore the create_json.py file
+create_json.py
