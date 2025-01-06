@@ -158,7 +158,11 @@
                         return response.text();
                     })
                     .then(markdown => {
-                        paperSummary.innerHTML = marked.parse(markdown);
+                        const htmlContent = marked.parse(markdown);
+                        const modifiedHtmlContent = htmlContent.replace(/src="([^"]+)"/g, (match, p1) => {
+                            return `src="Research_papers/${category}/${sanitizedTitle}/${p1}"`;
+                        });
+                        paperSummary.innerHTML = modifiedHtmlContent;
                         loadPaperImages(category, sanitizedTitle);
                     })
                     .catch(error => {
