@@ -135,7 +135,7 @@
 
             function loadPaperSummary(category, title) {
                 const sanitizedTitle = title.replace(/[^a-zA-Z0-9]/g, '_');
-                const paperPath = `Research_papers/${category}/${sanitizedTitle}/${sanitizedTitle}.md`;
+                const paperPath = `Research_papers/${category}/${sanitizedTitle}/${title}.md`;
                 fetch(paperPath)
                     .then(response => {
                         if (!response.ok) {
@@ -144,7 +144,11 @@
                         return response.text();
                     })
                     .then(markdown => {
-                        paperSummary.innerHTML = marked.parse(markdown);
+                        const htmlContent = marked.parse(markdown);
+                        const modifiedHtmlContent = htmlContent.replace(/src="([^"]+)"/g, (match, p1) => {
+                            return `src="Research_papers/${category}/${sanitizedTitle}/${p1}"`;
+                        });
+                        paperSummary.innerHTML = modifiedHtmlContent;
                     })
                     .catch(error => {
                         console.error(`Failed to fetch content for ${title}:`, error);
