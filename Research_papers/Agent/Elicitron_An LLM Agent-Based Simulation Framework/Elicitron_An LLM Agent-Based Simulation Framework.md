@@ -75,16 +75,22 @@ Empathic Lead User (ELU)インタビューテクニック(以下論文参照)を
 > Lin, Joseph and Seepersad, Carolyn Conner. “Empathic Lead Users: The Effects  of Extraordinary User Experiences on Customer Needs Analysis and Product Redesign.” International Design Engineering Technical Conferences and Computers and Information in Engineering Conference, Vol. 48043: pp. 289–296.  2007.
 
 エージェントは20名生成し、以下の追加プロンプトを生成した。
-> You must create non-typical users based on the following description of a typical user: “The typical user would be a weekend camper, 15-30 years old, with very good health and physical fitness, who camps a few times a year. The typical usage environment would be a public park or wilderness area, in a generally wooded or grassy environment with warm, sunny weather.”
+```
+You must create non-typical users based on the following description of a typical user: “The typical user would be a weekend camper, 15-30 years old, with very good health and physical fitness, who camps a few times a year. The typical usage environment would be a public park or wilderness area, in a generally wooded or grassy environment with warm, sunny weather.”
+```
 
 エージェントはシミュレーション上のプロダクト経験のプロンプトを与えられ、LLMに以下のインタビュークエスチョンをする。
-> Free style: “If you were to purchase an ideal tent, what main characteristics would you look for?”
-> 
-> Categorical: “Focusing specifically on the [category], aspect of tent, can you tell me your needs and any innovative insights to address those needs?”
+```
+Free style: “If you were to purchase an ideal tent, what main characteristics would you look for?”
+ 
+Categorical: “Focusing specifically on the [category], aspect of tent, can you tell me your needs and any innovative insights to address those needs?”
 Categories: size, shape, weight, material, safety, durability, aesthetics, ergonomics, cost, setup, transport
+```
 
 そのうえで、以下のプロンプトにより潜在ニーズを特定
-> If a reported customer need represented a significant change to the product design and did not match the categories [used in interview questions], then it was labeled as a latent need. Latent needs were also identified when a reported customer need represented an innovative insight into the product and/or product usage conditions.
+```
+If a reported customer need represented a significant change to the product design and did not match the categories [used in interview questions], then it was labeled as a latent need. Latent needs were also identified when a reported customer need represented an innovative insight into the product and/or product usage conditions.
+```
 
 潜在ニーズの評価は、Raterを二名作成し、ランダム10%をindependent labelingし、discrepancyをresolveする。次にランダム20%をinter-rater agreement scoreとして計算する。最後に、残りの70%をindependent labelingを各raterに割り振る。Inter rate agreementは以下のFスコアにより算出
 

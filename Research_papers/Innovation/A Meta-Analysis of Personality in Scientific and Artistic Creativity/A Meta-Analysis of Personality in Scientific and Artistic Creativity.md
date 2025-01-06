@@ -18,7 +18,7 @@ Five-Factor Model (or Big Five) dimensions: neuroticism, extraversion, openness,
 versus nonartists）
 
 # 研究内容
-###Five Factor Model Trait Terms and their Empirical Personality Inventory Scale and Item Correlates
+Five Factor Model Trait Terms and their Empirical Personality Inventory Scale and Item Correlates
 ![alt text](image.png)
 
 # 結果

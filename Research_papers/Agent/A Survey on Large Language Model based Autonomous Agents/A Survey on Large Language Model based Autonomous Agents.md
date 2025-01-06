@@ -265,8 +265,43 @@ Table 2 Representative applications of LLM-based autonomous agents.
 ![alt text](image-4.png)
 
 # LLM-based Autonomous Agent Evaluation
+Table 3 For subjective evaluation, we use ① and ② to represent human annotation and the Turing test, respectively. For objective evaluation, we use ①, ②, ③, and ④ to represent real-world simulation, social evaluation, multi-task evaluation, and software testing, respectively. “✓” indicates that the evaluations are based on benchmarks.
+![alt text](image-5.png)
+
+## 1. Subjective Evaluation
+### 1-1. Human Annotation
+人間の評価者が各種エージェントの生成内容に対して直接スコアやランキングを振るもの。例えば、Generative Agentsでは、エージェントのcapabilitiesに応じて5つのキーエリアを横断する能力を探索する25の質問に対して人間のannotatorsがエージェントを評価した。また、Social simulacraでは、annotatorsがデザインされたモデルが、オンラインコミュニティでのルール開発を改善できるか評価した。
+
+> Park J S, O’Brien J, Cai C J, Morris M R, Liang P, Bernstein M S. Generative agents: Interactive simulacra of human behavior. In: Proceedings of the 36th Annual ACM Symposium on User Interface Software and Technology. 2023, 1–22
+
+> Park J S, Popowski L, Cai C, Morris M R, Liang P, Bernstein M S. Social simulacra: Creating populated prototypes for social computing systems. In: Proceedings of the 35th Annual ACM Symposium on User Interface Software and Technology. 2022, 1–18
+
+### 1-2. Turing Test
+人間の評価者が、エージェントと人間が作成したアウトプットの違いを評価するもの。もし、評価者がエージェントと人間の結果を識別できなければ、エージェントは人間のようなパフォーマンスを実現できていると考えるもの。
+
+> Argyle L P, Busby E C, Fulda N, Gubler J R, Rytting C, Wingate D. Out of one, many: Using language models to simulate human samples. Political Analysis, 2023, 31(3): 337–351
+
+## 2. Objective Evaluation
+Quatitativeなmetricsを用いて、エージェントを継続的に評価するもの。Objective Evaluationのためには、3つの重要な要素があり、**Evaluation Metrics**, **Protocols**, **Benchmarks**である。
+
+### 2-1. Evaluation Metrics
+Metricsとしては、大きく3つ存在している。
+- **Task success metrics**: どの程度エージェントがタスクを完了し、ゴールを実現できたかを図るメトリクス。一般的なメトリクスは、Success Rate, Reward/score, coverage, accuracy/error rateである。Accuracyは、どの程度タスクを実行できたか、タスクが妥当かを評価するものである。
+- **Human similarity metrics**: エージェントの行動がどの程度人間に類似しているかを評価するもの。例えば、coherent, fluent, dialogue similarities with human, human acceptance rateがある。
+- **Efficiency metrics**: エージェントのefficiencyを評価するもの。メトリクスには、the cost associated with development, training efficiencyがある。
+
+### 2-2. Protocols
+- **Real-world simulation**: 特定の環境下（ゲーム、インタラクティブシミュレーター）でのエージェント評価。エージェントは環境内で自律的に動き、メトリクス（例：task success rate, human similarity）によりエージェントのcapabilityが評価され、目的完了が評価される。これにより、環境内でシミュレートすることで、エージェントのプラクティカルなcapabilitiesを判断できる。
+- **Social evaluation**: これはsimulated socieitiesにおけるエージェントのインタラクションにより、ソーシャルインテリジェンスを評価するもの。例えば、チームワークスキルを評価するためのコラボレーティブタスク、議論すべき内容のリーズニングに関するディベートをアナライズする、社会的性を評価するための人間の学習など。これらは、エージェントのcoherence, theory of mind, social IQを評価することになり、人間のsocial behaviorをミミックできているかを評価する。
+- **Multi-task evaluation**:本メソッドでは、異なるドメインの多様なタスクを実施する能力を評価するもの。
+- **Software testing**: ソフトウェアのテストタスクををエージェントが実施することにより評価するもの。 
+
+## 2-3. Benchmarks
+多くのスタディは、ALFWorld, IGLU, Minecraftをインタラクティブでタスクオリエンティッドなシミュレーションの評価として使ってきた。Agent-Benchは、包括的なフレームワークを用いて、初めてシステマチックな評価をした。SocKETは、58のタスクに関する5つのカテゴリー（Humor and sarcasm, emotions and feelings, credibility）の評価を行った。AgentSimsでは、エージェントがプランニング、メモリー、アクションについてのeffectivenessを評価した。WebShopでは、1.18百万のリアルワールドアイテムを用いたProduct search and retrievalのケイパビリティを評価した。
 
 
 # 結果
+None(review論文のため)
 
 # 考察
+None

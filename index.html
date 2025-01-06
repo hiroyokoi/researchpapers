@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper Repository</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            background-color: #4a4e69;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        main {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 800px;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            font-size: 1em;
+        }
+
+        .paper-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .paper-list li {
+            background-color: #9a8c98;
+            margin-bottom: 10px;
+            padding: 10px;
+            color: white;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .paper-list li:hover {
+            background-color: #c9ada7;
+        }
+
+        .paper-summary {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        Research Paper Repository
+    </header>
+    <main>
+        <select id="category-select">
+            <option value="">Select a category</option>
+        </select>
+        <ul class="paper-list" id="paper-list"></ul>
+        <div class="paper-summary" id="paper-summary"></div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category-select');
+            const paperList = document.getElementById('paper-list');
+            const paperSummary = document.getElementById('paper-summary');
+
+            // Load categories
+            fetch('data/categories.json')
+                .then(response => response.json())
+                .then(categories => {
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        categorySelect.appendChild(option);
+                    });
+                });
+
+            // Load papers when category is selected
+            categorySelect.addEventListener('change', function() {
+                const selectedCategory = categorySelect.value;
+                if (selectedCategory) {
+                    fetch(`data/${selectedCategory}.json`)
+                        .then(response => response.json())
+                        .then(papers => {
+                            paperList.innerHTML = '';
+                            papers.forEach(paper => {
+                                const li = document.createElement('li');
+                                li.textContent = paper.title;
+                                li.addEventListener('click', function() {
+                                    loadPaperSummary(selectedCategory, paper.title);
+                                });
+                                paperList.appendChild(li);
+                            });
+                        });
+                } else {
+                    paperList.innerHTML = '';
+                    paperSummary.innerHTML = '';
+                }
+            });
+
+            function loadPaperSummary(category, title) {
+                const paperDir = title.replace(/[^a-zA-Z0-9]/g, '_');
+                fetch(`Research_papers/${category}/${paperDir}/${paperDir}.md`)
+                    .then(response => response.text())
+                    .then(markdown => {
+                        paperSummary.innerHTML = convertMarkdownToHTML(markdown);
+                    });
+            }
+
+            function convertMarkdownToHTML(markdown) {
+                // A simple markdown to HTML converter (you might want to use a library for full conversion)
+                return markdown
+                    .replace(/#/g, '<h1>')
+                    .replace(/\n/g, '<br>');
+            }
+        });
+    </script>
+</body>
+</html>

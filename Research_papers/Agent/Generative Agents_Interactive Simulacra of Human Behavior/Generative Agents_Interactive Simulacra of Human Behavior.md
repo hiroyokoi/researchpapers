@@ -52,12 +52,21 @@ Figure 2: The Smallville sandbox world, with areas labeled. The root node descri
 
 エージェントは、smallvilleの中を動き回る。エージェントの動きは、generative agentのアーキテクチャとサンドボックス内のゲームエンジンにdirectされる。例えば、エージェントがどこかに移動するときに、裏側ではsmallville内の環境において目的地までのwalking pathが計算され、そのうえで、エージェントは動き出す。
 
-　　
-##
+![alt text](image-1.png)
+Figure 3: A morning in the life of a generative agent, John Lin. John wakes up around 6 am and completes his morning routine, which includes brushing his teeth, taking a shower, and eating breakfast. He briefly catches up with his wife, Mei, and son, Eddy, before heading out to begin his workday.
 
+![alt text](image-2.png)
+Figure 4: At the beginning of the simulation, one agent is initialized with an intent to organize a Valentine’s Day party. Despite many possible points of failure in the ensuing chain of events—agents might not act on that intent, might forget to tell others, might not remember to show up—the Valentine’s Day party does, in fact, occur, with a number of agents gathering and interacting.
+
+## 1-3. Emergent Social Behaviors
+- Information Diffusion
+- Relationship Memory
+- Coordination
 
 # 2. GENERATIVE AGENT ARCHITECTURE
+Generative Agentsのコアのアーキテクチャは、Memory Streamであり、レコードがエージェントの経験として蓄積されていき、エージェントの特定のアクションを計画するのにrelevantなものがretrieveされ、レコードとなる。このレコードが継続的により高次元のリフレクションとしてシンセサイズされ、自然言語してreasoningされる。
 
+## 2-1. Memory and Retrieval
 
 # 結果
 
