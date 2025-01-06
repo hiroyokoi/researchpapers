@@ -5,4 +5,6 @@
 
 # Ignore the create_json.py file
 create_json.py
+
+# Ignore the notebook.png file
 notebook.png

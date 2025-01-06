@@ -78,6 +78,200 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <header>
+        Research Paper Repository
+    </header>
+    <div class="menu">
+        <label for="category-select">Select a category:</label>
+        <select id="category-select">
+            <option value="">Select a category</option>
+        </select>
+        <label for="paper-select">Select a research paper:</label>
+        <select id="paper-select">
+            <option value="">Select a research paper</option>
+        </select>
+    </div>
+    <main>
+        <div class="paper-summary" id="paper-summary"></div>
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const categorySelect = document.getElementById('category-select');
+            const paperSelect = document.getElementById('paper-select');
+            const paperSummary = document.getElementById('paper-summary');
+
+            // Load categories
+            fetch('data/categories.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(categories => {
+                    categories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error("Failed to fetch categories:", error);
+                });
+
+            // Load papers when category is selected
+            categorySelect.addEventListener('change', function() {
+                const selectedCategory = categorySelect.value;
+                paperSelect.innerHTML = '<option value="">Select a research paper</option>';
+                paperSummary.innerHTML = '';
+
+                if (selectedCategory) {
+                    fetch(`data/${selectedCategory}.json`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(papers => {
+                            papers.forEach(paper => {
+                                const option = document.createElement('option');
+                                option.value = paper.title;
+                                option.textContent = paper.title;
+                                paperSelect.appendChild(option);
+                            });
+                        })
+                        .catch(error => {
+                            console.error(`Failed to fetch papers for ${selectedCategory}:`, error);
+                        });
+                }
+            });
+
+            // Load paper summary when paper is selected
+            paperSelect.addEventListener('change', function() {
+                const selectedCategory = categorySelect.value;
+                const selectedPaper = paperSelect.value;
+
+                if (selectedCategory && selectedPaper) {
+                    loadPaperSummary(selectedCategory, selectedPaper);
+                } else {
+                    paperSummary.innerHTML = '';
+                }
+            });
+
+            function loadPaperSummary(category, title) {
+                const encodedTitle = encodeURIComponent(title);
+                const paperPath = `Research_papers/${category}/${encodedTitle}/${encodedTitle}.md`;
+                fetch(paperPath)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.text();
+                    })
+                    .then(markdown => {
+                        const htmlContent = marked.parse(markdown);
+                        const modifiedHtmlContent = htmlContent.replace(/src="([^"]+)"/g, (match, p1) => {
+                            return `src="Research_papers/${category}/${encodedTitle}/${p1}" style="max-width:100%;height:auto;"`;
+                        });
+                        paperSummary.innerHTML = modifiedHtmlContent;
+                        MathJax.typesetPromise();  // 数式をレンダリング
+                    })
+                    .catch(error => {
+                        console.error(`Failed to fetch content for ${title}:`, error);
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
+
+<!-- <!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Paper Repository</title>
+    <link rel="icon" href="notebook.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4a4e69;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: white;
+            font-size: 2em;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .menu {
+            position: sticky;
+            top: 0;
+            background-color: #f4f4f9;
+            padding: 10px 0;
+            width: 100%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+
+        .menu label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .menu select {
+            padding: 10px;
+            font-size: 1em;
+            margin-right: 20px;
+        }
+
+        main {
+            margin-top: 20px;
+            width: 80%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .paper-summary {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            overflow-wrap: break-word;
+        }
+        
+        .paper-summary img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .paper-summary pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-x: auto;
+            background-color: #f4f4f9;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -367,4 +561,4 @@
     </script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </body>
-</html> -->
+</html> --> -->
