@@ -66,7 +66,91 @@ Figure 4: At the beginning of the simulation, one agent is initialized with an i
 # 2. GENERATIVE AGENT ARCHITECTURE
 Generative Agentsのコアのアーキテクチャは、Memory Streamであり、レコードがエージェントの経験として蓄積されていき、エージェントの特定のアクションを計画するのにrelevantなものがretrieveされ、レコードとなる。このレコードが継続的により高次元のリフレクションとしてシンセサイズされ、自然言語してreasoningされる。
 
+![alt text](image-4.png)
+Figure 5: Our generative agent architecture. Agents perceive their environment, and all perceptions are saved in a comprehensive record of the agent’s experiences called the memory stream. Based on their perceptions, the architecture retrieves relevant memories and uses those retrieved actions to determine an action. These retrieved memories are also used to form longer-term plans and create higher-level reflections, both of which are entered into the memory stream for future use.
+
 ## 2-1. Memory and Retrieval
+Memory Streamは、メモリオブジェクトのリストであり、オブジェクトは自然言語の説明、タイムスタンプの生成、最も直近アクセスしたタイムスタンプ、を意味する。最もベーシックなmemory streamの要素は*observation*である。よくあるobservationsは、エージェント自身による行動、もしくは他のエージェントが実行ししたものを当該エージェントが認識する（perceive）行動である。例えば、Isabella Rodriguezは、コーヒーショップで働いており、以下のようなobservationを行う。
+```
+(1) Isabella Rodriguez is setting out the pastries
+(2) Maria Lopez is studying for a Chemistry test while drinking coffee
+(3) Isabella Rodriguez and Maria Lopez are conversing about planning a Valentine’s day party at Hobbs Cafe
+(4) The refrigerator is empty
+```
+
+Retrieval functionとして、エージェントの現在の状況をインプットに、一式のメモリーストリームをリターンする。Retrievalを適切に行うため、以下の方法により実行された。
+- *Recency*: 最近アクセスされたメモリーオブジェクトに高いスコアが付与される。実装では、サンドボックスでのゲーム時間に応じてexponential decay functionを適用し、decay factorは0.995に設定した。
+- *Importance*: コアメモリのありふれたメモリから、エージェントが重要だと思うメモリーオブジェクトを識別するためのもの。朝食を食べるなどの取るに足らないイベントは低いimportanceスコアが与えれば、そうではない場合は高いスコアとなる。実装では、LLMに以下のとおりプロンプトを与えてスコアをintegerで算出した。Importanceスコアは、メモリオブジェクトが作られるときに算出した。
+    ```
+    >On the scale of 1 to 10, where 1 is purely mundane (e.g., brushing teeth, making bed) and 10 is extremely poignant (e.g., a break up, college acceptance), rate the likely poignancy of the following piece of memory. Memory: buying groceries at The Willows Market and Pharmacy
+
+    >Rating: <fill in>
+    ```
+- *Relevance*:現在のシチュエーションに関連するメモリーオブジェクトが高いスコアが与えられる。関連するという点については、queryと各メモリ内のembedding vectorのcosine similarityにより算出した。
+- *final retrieval score*: 0~1の範囲で、3つの指標をminmax scalingし算出した。各要素にウェイトをかける形都市、以下のように算出された。実装では、$\alpha$はすべて1に設定した。
+  
+  $retrievalscore = \alpha_{recency} \cdot recency + \alpha_{importance} \cdot importance + \alpha_{relevance} \cdot relevance$
+
+![alt text](image-3.png)
+Figure 6: The memory stream comprises a large number of observations that are relevant and irrelevant to the agent’s current situation. Retrieval identifies a subset of these observations that should be passed to the language model to condition its response to the situation.
+
+## 2-2. Reflection
+Reflectionを適切に行うため、もう一つのメモリである**reflection**を使う。Reflectionは、エージェントが生成するハイレベルでアブストラクトな思考である。これはメモリの一つであるため、Retrievalが発生する際に他のobservationsと一緒に引っ張ってくることができる。Reflectionsは定期的に行うものであり、実装では、直近のイベントのimportance scoreの合計が閾値（実装では150回）を超えた時にreflectionsを実行した。実態として、エージェントは1日に2-3回リフレクションを実行した。
+
+Reflectionの第1ステップは、何をreflectionするかであり、これはエージェントの直近の経験から、想定される質問をidentifyすることである。
+
+本実装では、まずエージェントのmemory streamのもっとも直近の100レコードに対してlarge language modelにqueryを行う。memory streamの例は以下のとおり。
+
+```
+“Klaus Mueller is reading a book on gentrification”
+
+“Klaus Mueller is conversing with a librarian about his research project” 
+
+“desk at the library is currently unoccupied”
+```
+
+次に、language modelでプロンプトを出す。
+```
+“Given only the information above, what are 3 most salient highlevel questions we can answer about the subjects in the statements?
+```
+
+その結果、モデルは以下のような質問候補を生成する。
+
+```
+What topic is Klaus Mueller passionate about?
+
+What is the relationship between Klaus Mueller and Maria Lopez? 
+```
+
+これらの質問をRetrieval用のクエリとして用い、各質問に対してrelevantなメモリを収集する。
+
+次に、LLMを用いて、インサイトを抽出し、インサイトの基となる特定のレコードも引用する。プロンプトは以下のとおり。
+
+```
+Statements about Klaus Mueller
+1. Klaus Mueller is writing a research paper
+2. Klaus Mueller enjoys reading a book on gentrification
+3. Klaus Mueller is conversing with Ayesha Khan about exercising [...]
+
+What 5 high-level insights can you infer from the above statements? (example format: insight (because of 1, 5, 3))
+
+```
+
+これにより、以下のようなレスポンスが返ってくる。
+```
+Klaus Mueller is dedicated to his research on gentrification (because of 1, 2, 8, 15). 
+```
+
+このstatementsをメモリストリーム内のreflectionとして保存する。なお、引用されたメモリーオブジェクトも含めて保存する。
+
+Reflectionsは、自分自身のobservationsだけではなく、他のエージェントのreflectionsも反映させられる。Klaus Muellerの上記のreflectionは彼自身のものではなく、他のenvironmentのものである。その結果、エージェントはtrees of reflectionsを作成することができ、リーフノードがbase observationsを示し、non-leaf nodesがより抽象化され、ハイレベルなreflectionsとなる。
+
+![alt text](image-5.png)
+Figure 7: A reflection tree for Klaus Mueller. The agent’s observations of the world, represented in the leaf nodes, are recursively synthesized to derive Klaus’s self-notion that he is highly dedicated to his research
+
+## 2-3. Planning and Reacting
+
+
 
 # 結果
 
