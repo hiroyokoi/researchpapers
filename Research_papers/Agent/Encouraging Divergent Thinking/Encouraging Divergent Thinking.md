@@ -69,9 +69,9 @@ Table 3:Accuracy on Counter-Intuitive AR.
 
 ### 分析
 #### Bias and Diversity
-BiasとDiversityを評価した。Biasは人間の評価を行った。Diversityは、Yin et al.によるSelf-BlEU scoreを用いて、翻訳の多様性を評価した。
+BiasとDiversityを評価した。Biasは人間の評価を行った。Diversityは、Yin et al.によるSelf-BLEU scoreを用いて、翻訳の多様性を評価した。
 
-$$ Diversity = 100 - Self_BLEU(Cand_1, Cand_2) $$
+$$ Diversity = 100 - Self_{BLEU}(Cand_1, Cand_2) $$
 Candidate1は、最初の翻訳（MADのaffirmative sideのself-reflectionのアンサー）であり、Candidate2は、現在の翻訳（MADにおけるSelf-reflectionもしくはNegative Sideのレスポンスを修正した結果）
 
 >Haiyan Yin, Dingcheng Li, Xu Li, and Ping Li. 2020.Meta-cotgan: A meta cooperative training paradigm for improving adversarial text generation.In Proceedings of the AAAI Conference on Artificial Intelligence, volume 34, pages 9466–9473.

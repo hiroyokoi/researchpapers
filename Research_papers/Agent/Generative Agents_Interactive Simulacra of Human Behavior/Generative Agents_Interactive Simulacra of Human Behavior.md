@@ -149,8 +149,115 @@ Reflectionsは、自分自身のobservationsだけではなく、他のエージ
 Figure 7: A reflection tree for Klaus Mueller. The agent’s observations of the world, represented in the leaf nodes, are recursively synthesized to derive Klaus’s self-notion that he is highly dedicated to his research
 
 ## 2-3. Planning and Reacting
+Planは、エージェントの将来の一連のアクションを説明するものであり、一貫した行動をとるのを助けるものである。Planには、ロケーション、starting time、durationが含まれる。Planは、memory streamに保存され、retrieval processにも含まれる。これにより、エージェントは、Observations, reflections, plansをすべて一度に検討することができる。
 
+Planは、top-downから始まり、再帰的に詳細を生成する。最初のステップは、broad stokesな一日のアジェンダのプランを作成することである。初期プランを作成するため、実装では、エージェントにsummary description（名前、特徴、直近の経験のサマリ）のプロンプトを出し、前日のサマリを行う。
 
+```
+Name: Eddy Lin (age: 19)
+Innate traits: friendly, outgoing, hospitable
+Eddy Lin is a student at Oak Hill College studying music theory and composition. He loves to explore different musical styles and is always looking for ways to expand his knowledge. Eddy Lin is working on a composition project for his college class. He is taking classes to learn more about music theory. Eddy Lin is excited about the new composition he is working on but he wants to dedicate more hours in the day to work on it in the coming days On Tuesday February 12, Eddy 1) woke up and completed the morning routine at 7:00 am, [. . . ] 6) got ready to sleep around 10 pm. Today is Wednesday February 13. Here is Eddy’s plan today in broad strokes: 1)
+```
+
+本プロンプトにより、エージェントは一日の活動をのプランのラフスケッチができ、5-8のチャンクに分解される。
+
+```
+“1) wake up and complete the morning routine at 8:00 am, 2) go to Oak Hill College to take classes starting 10:00 am, [. . . ] 5) work on his new music composition from 1:00 pm to 5:00 pm, 6) have dinner at 5:30 pm, 7) finish school assignments and go to bed by 11:00 pm.”
+```
+
+エージェントは、このプランをmemory streamに保存し、再帰的にfiner-grainedなアクションを作成するために分解していく。最初に、hour-longのchunk of actionsを作成する。
+
+```
+Eddy’s plan to work on his new music composition from 1:00 pm to 5:00 pm becomes 1:00 pm: start by brainstorming some ideas for his music composition [...] 4:00 pm: take a quick break and recharge his creative energy before reviewing and polishing his composition
+```
+
+次に、これを再帰的に5-15分のチャンクに分解していく。
+
+```
+4:00 pm: grab a light snack, such as a piece of fruit, a granola bar, or some nuts. 4:05 pm: take a short walk around his workspace [...] 4:50 pm: take a few minutes to clean up his workspace.
+```
+
+### 2-3-1. Reacting and Updating Plans
+エージェントは、各アクション時に周囲の状況を認知し、そのobservationsをmemory streamに保存する。それらのobservationsをプロンプトに入れることにより、エージェントが既存のプランを継続するか、反応するか決めさせる。プロンプトは以下の`Agent's Summaryu Description`の通りである。これは、ダイナミカルに生成され、パラグラフ・ロングのエージェントのオーバーオールのゴールと配置を伴う。
+```
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm.
+
+John Lin’s status: John is back home early from work.
+
+Observation: John saw Eddy taking a short walk around his workplace.
+
+Summary of relevant context from John’s memory: Eddy Lin is John’s Lin’s son. Eddy Lin has been working on a music composition for his class. Eddy Lin likes to walk around the garden when he is thinking about or listening to music. 
+
+Should John react to the observation, and if so, what would be an appropriate reaction?
+```
+
+コンテキストサマリは、queryを通じメモリーをretrieveする二つのプロンプトによって生成される。
+```
+- “What is [observer]’s relationship with the [observed entity]?”
+- “[Observed entity] is [action status of the observed entity]”
+```
+
+その結果、アウトプットは、以下のようなものが出てくる。
+
+```
+John could consider asking Eddy about his music composition project.
+```
+
+そのうえで、リアクションに基づき、既存のプランを変更するかエージェントに決めさせる。もし、エージェント間でのインタラクションをアクションが含む結果となれば、ダイアログを生成する。
+
+### 2-3-2. Dialogue
+エージェントは相互にかかわりあうため、ダイアログが発生する。実装では、互いのメモリでの発話によりエージェントのダイアログを発生させた。例えば、JohnがEddyと会話を始めた場合、JohnはEddyに関する自分のサマライズされたメモリを用いてJohenの最初の発話を生成し、Eddyに何を聞くかのリアクションを生成する。
+
+```
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm
+John Lin’s status: John is back home early from work.
+Observation: John saw Eddy taking a short walk around his workplace.
+Summary of relevant context from John’s memory: Eddy Lin is John’s Lin’s son. Eddy Lin has been working on a music composition for his class. Eddy
+Lin likes to walk around the garden when he is thinking about or listening to music. John is asking Eddy about his music composition
+project. What would he say to Eddy?
+```
+
+エージェントのレスポンスの結果は以下となる。
+
+```
+“Hey Eddy, how’s the music composition project for your class coming along?”
+```
+
+Eddyのかんてんでは、Johnとダイアログを開始し、リアクトすべきイベントであると認識する。そうすると、EddyはJohnとの関係に関するメモリをサマライズしretrieveし、同時に、Johnの最後の会話に基づくメモリもRetrieveする。Eddyがレスポンスすると決めたら、Eddyは自身のサマライズされたメモリを使って発話を行う。
+
+```
+[Agent’s Summary Description]
+It is February 13, 2023, 4:56 pm.
+Eddy Lin’s status: Eddy is taking a short walk around his workplace.
+Observation: John is initiating a conversation with Eddy.
+Summary of relevant context from Eddy’s memory: John Lin is Eddy Lin’s father. John Lin is caring and is interested to learn more about Eddy Lin’s school work. John Lin knows that Eddy Lin is working on a music composition. Here is the dialogue history: John: Hey Eddy, how’s the music composition project for your class coming along?
+How would Eddy respond to John?
+```
+
+その結果、以下のEddyのレスポンスを伴う。
+```
+“Hey Dad, it’s going well. I’ve been taking walks around the garden to clear my head and get some inspiration.”
+```
+
+このダイアログは、いずれかのエージェントがダイアログを終えるまで同じメカニズムが働く。
+
+# 3. SANDBOX ENVIRONMENT IMPLEMENTATION
+Smallvilleのサンドボックスgame environmentは、Phase web gave development frameworkを用いている。本実装では、エージェントに対してサンドボックスの情報を与えて、サーバー内で自由に動けるようにした。サーバーは、エージェントの行動をJSONフォーマットでサンドボックス内に保存している。
+
+サンドボックス内では、エージェントがボックス内での位置を捉えるため、ツリー構造を採用した。例えば、"stove"は"Kitchen"のchildであり、ここから"there is a stove in the kitchen"の構造が出力される。エージェントのツリーの構造から、ナビテーションを行う。イニシャルでは、エージェントがawareするスペースとオブジェクト（部屋など）をツリーから検知して、配置する。エージェントはツリーに基づいて、新しく認識したエリアに移動する。エージェントの各アクションにおいて最適な場所を決定するために、以下の通りプロンプトを作成する。この結果としては、`take a short walk around his workspace`となる。
+
+```
+[Agent’s Summary Description]
+Eddy Lin is currently in The Lin family’s house: Eddy Lin’s bedroom: desk) that has Mei and John Lin’s bedroom, Eddy Lin’s bedroom, common room, kitchen, bathroom, and garden.
+Eddy Lin knows of the following areas: The Lin family’s house, Johnson Park, Harvey Oak Supply Store, The Willows Market and Pharmacy, Hobbs Cafe, The Rose and Crown Pub.
+* Prefer to stay in the current area if the activity can be done there.
+Eddy Lin is planning to take a short walk around his workspace. Which area should Eddy Lin go to?
+```
+このアウトプットは、`The Lin family's house`となる。このプロセスを再帰的に繰り返し、最も適切なサブエリアを決める。最後に、トラディショナルなgame path algorithmsを用いて、エージェントの動きをアニメートしている。エージェントが移動したら、プロンプトを提供し、例えば、Isabellaがアクションとして`making espresso for a customer`となった場合、プロンプトのクエリとして、`off`や`brewing coffee`となる。
+
+# 評価
 
 # 結果
 
