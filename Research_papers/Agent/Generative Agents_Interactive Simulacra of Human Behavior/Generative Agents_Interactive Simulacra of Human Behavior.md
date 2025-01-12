@@ -244,7 +244,7 @@ How would Eddy respond to John?
 このダイアログは、いずれかのエージェントがダイアログを終えるまで同じメカニズムが働く。
 
 # 3. SANDBOX ENVIRONMENT IMPLEMENTATION
-Smallvilleのサンドボックスgame environmentは、Phase web gave development frameworkを用いている。本実装では、エージェントに対してサンドボックスの情報を与えて、サーバー内で自由に動けるようにした。サーバーは、エージェントの行動をJSONフォーマットでサンドボックス内に保存している。
+Smallvilleのサンドボックスgame environmentは、Phaser web game development frameworkを用いている。本実装では、エージェントに対してサンドボックスの情報を与えて、サーバー内で自由に動けるようにした。サーバーは、エージェントの行動をJSONフォーマットでサンドボックス内に保存している。
 
 サンドボックス内では、エージェントがボックス内での位置を捉えるため、ツリー構造を採用した。例えば、"stove"は"Kitchen"のchildであり、ここから"there is a stove in the kitchen"の構造が出力される。エージェントのツリーの構造から、ナビテーションを行う。イニシャルでは、エージェントがawareするスペースとオブジェクト（部屋など）をツリーから検知して、配置する。エージェントはツリーに基づいて、新しく認識したエリアに移動する。エージェントの各アクションにおいて最適な場所を決定するために、以下の通りプロンプトを作成する。この結果としては、`take a short walk around his workspace`となる。
 
@@ -258,7 +258,93 @@ Eddy Lin is planning to take a short walk around his workspace. Which area shoul
 このアウトプットは、`The Lin family's house`となる。このプロセスを再帰的に繰り返し、最も適切なサブエリアを決める。最後に、トラディショナルなgame path algorithmsを用いて、エージェントの動きをアニメートしている。エージェントが移動したら、プロンプトを提供し、例えば、Isabellaがアクションとして`making espresso for a customer`となった場合、プロンプトのクエリとして、`off`や`brewing coffee`となる。
 
 # 評価
+Research questionsは以下２点
+- Do individual agents properly retrieve past experiences and generate believable plans, reactions, and thoughts that shape their behavior?
+- Does a community of agents demonstrate information diffusion, relationship formation, and agent coordination across different pockets of the community?
 
-# 結果
+# 評価１：個別エージェント評価
+## アプローチ
+エージェントのポイントは過去の記憶をうまく呼び起こせるかであるため、評価はエージェントに対するインタビューとした。インタビューは、エージェントの過去のワークの記憶に対する*believability*を評価することとし、Self-Knowledge, Memory, Plans, Reactions, Reflectionsの５つのkey areasで行った。
+
+- **Self-knowledge**: We ask questions such as “Give an introduction of yourself” or “Describe your typical weekday schedule in broad strokes” that require the agent to maintain an uderstanding of their core characteristics.
+- **Memory**: We ask questions that prompt the agent to retrieve particular events or dialogues from their memory to answer properly, such as “Who is [name]?” or “Who is running for mayor?”
+- **Plans**: We ask questions that require the agent to retrieve their long-term plans, such as “What will you be doing at 10 am tomorrow?”
+- **Reactions**: As a baseline of believable behavior, we present hypothetical situations for which the agent needs to respond believably: “Your breakfast is burning! What would you do?”
+- **Reflections**: We ask questions that require the agents to leverage their deeper understanding of others and themselves gained through higher-level inferences, such as “If you were to spend time with one person you met recently, who would it be and why?”
+
+エージェントは２日間のゲームデイシミュレーションの後に評価される。believabilityを的確に評価するために、100名の人間の評価者をリクルートし、ランダムに選択されたエージェントのリプレイを視聴してもらった。評価者は４つの異なるエージェントと一人の人間によって構築されたエージェントのレスポンスが生成したものを比較し、５名のエージェントの間でbelievabilityのランク付けをして評価した。
+
+統計的なジャスティフィケーションは、Kruskal-Wallis test（One-way ANOVAに対するノンパラメトリックなalternativeな手法）を生のrank dataに対して実施し、その後、条件の違いを評価するためにDunn post-hoc testを実施し、そのうえで、Holm-Bonferroni methodを用いてDunn testをmultiple comparisonsしp-valueをアジャストした。
+
+定性的なジャスティフィケーションは、inductive analysisによって実行した。Qualitative open codingを二つのフェーズにおいて実施。第１フェーズが、センテンスレベルで生成されたレスポンスをコーディングした。第２フェーズが、ハイレベルのテーマを抽出するため、コーディングをシンセサイズした。
+
+## 結果
+フルアーキテクチャが最も良い精度となった。過去の経験を呼び起こし、多様なコンテクスト横断でself-knowledgeと一貫した回答をできるエージェントが最も的確なbelievabilityを表現していることがわかった。特に、reflectionのメカニズムは、過去の経験を深いレベルでシンセサイズし、意思決定を行うためには不可欠な要素である。
+
+![alt text](image-6.png)
+
+Figure 8: The full generative agent architecture produces more believable behavior than the ablated architectures and the human crowdworkers. Each additional ablation reduces the performance of the architecture.
+
+# 評価２：エージェントグループ評価
+コミュニティとしてemergent behaviorsが出現したか評価するためdescriptive measurementsをデザインした。Emergent Outcomesは３つの観点で評価し、①Information diffusion, ②relationship formation、③Agent Coordinationである。
+
+## アプローチ
+コミュニティ内で重要な情報があれば、自動的にエージェント間で伝播されるはずであるという仮説のもと、２つの情報を評価した。
+- Sam’s candidacy for village mayor
+- Isabella’s Valentine’s Day party at Hobbs Cafe
+
+会話の最初は、最初に発話した人だけの情報であり、Sam for the candicdacyであるし、Isabella for the partyであった。その後、情報の普及を評価するために、２５名のエージェントにインタビューし、以下２点を聞いた。
+- “Did you know there is a Valentine’s Day party?”
+- “Do you know who is running for mayor?”
+
+これらのインタビュー結果に対して、Yes/Noのラベルをはり、情報を認識しているエージェントの割合を評価した。また、これらのインタビューの手前の段階で、誰が誰とつながっているからこの情報が伝播したかの情報があるため、`"Do you know of <name>?"`という質問を入れることで、エージェントのレスポンスが無向グラフとしてmutual knowledgeとして表現できることになる。これをネットワーク密度として評価し、$\eta=2*|E|/|V|(|V|-1)$として評価した。
+- $|V|$はverticiesの数
+- $|E|$はグラフ内のエッジの数
+本論文では、シミュレーションの最初から最後で、ネットワーク密度がどれだけ密になっていくかを評価した。
+
+## 結果
+Samのmayoral candidacyはシミュレーションの初期では4%だったのが、32%に上昇した。Isabellaのpartyは、4%から52%に上昇した。これらの結果、ネットワーク密度、すなわち新しいエージェント間の関係性は、0.167から0.74に上昇した。
+
+![alt text](image-7.png)
+
+Figure 9: The diffusion path for Isabella Rodriguez’s Valentine’s Day party invitation involved a total of 12 agents, aside from Isabella, who heard about the party at Hobbs Cafe by the end of the simulation
 
 # 考察
+
+# Appendix
+## Agentに対するインタビューリスト
+
+**Self-Knowledge**<br>
+• Give an introduction of yourself.<br>
+• What’s your occupation?<br>
+• What is your interest?<br>
+• Who do you live with?<br>
+• Describe your typical weekday schedule in broad strokes.<br>
+
+**Memory**<br>
+• Who is [Wolfgang Schulz]?<br>
+• Who is Kane Martinez?<br>
+• Was there a Valentine’s day party?<br>
+• Who is [Ayesha Khan]?<br>
+
+**Plans**<br>
+• What will you be doing at 6am today?<br>
+• What will you be doing at 6pm today?<br>
+• What will you have just finished doing at 1pm today?<br>
+• What will you have just finished doing at 12pm today?<br>
+• What will you be doing at 10pm today?<br>
+
+**Reactions**<br>
+• Your breakfast is burning! What would you do?<br>
+• The bathroom is occupied. What would you do?<br>
+• You need to cook dinner but your refrigerator is empty. What would you do?<br>
+• You see your friend walking by the street. What would you do<br>
+or say to your friend?<br>
+• You see fire on the street. What would you do?<br>
+
+**Reflections**<br>
+• What inspires you in life the most right now, and why?<br>
+• If you had to guess given what you know about [Ayesha Khan], what book do you think she will like and why?
+• If you had to get something [Ayesha Khan] likes for he<br>r birthday, what would you get her?<br>
+• What would you say to [Ayesha Khan] to compliment her?<br>
+• If you could spend time with someone you talked to recently, who would it be and why?
