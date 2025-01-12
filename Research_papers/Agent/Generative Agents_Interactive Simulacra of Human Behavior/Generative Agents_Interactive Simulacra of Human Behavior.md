@@ -338,13 +338,12 @@ Figure 9: The diffusion path for Isabella Rodriguez’s Valentine’s Day party 
 • Your breakfast is burning! What would you do?<br>
 • The bathroom is occupied. What would you do?<br>
 • You need to cook dinner but your refrigerator is empty. What would you do?<br>
-• You see your friend walking by the street. What would you do<br>
-or say to your friend?<br>
+• You see your friend walking by the street. What would you do or say to your friend?<br>
 • You see fire on the street. What would you do?<br>
 
 **Reflections**<br>
 • What inspires you in life the most right now, and why?<br>
-• If you had to guess given what you know about [Ayesha Khan], what book do you think she will like and why?
-• If you had to get something [Ayesha Khan] likes for he<br>r birthday, what would you get her?<br>
+• If you had to guess given what you know about [Ayesha Khan], what book do you think she will like and why?<br>
+• If you had to get something [Ayesha Khan] likes for her birthday, what would you get her?<br>
 • What would you say to [Ayesha Khan] to compliment her?<br>
 • If you could spend time with someone you talked to recently, who would it be and why?
